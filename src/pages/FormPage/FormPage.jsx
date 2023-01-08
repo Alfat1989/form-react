@@ -16,7 +16,12 @@ const FormPage = () => {
       <button type="button" onClick={toggleModal}>
         Open form
       </button>
-      {open && <Modal children={<Form />} onClick={toggleModal} />}
+      {open && (
+        <Modal
+          children={<Form title={'Enter your details'} />}
+          onClick={toggleModal}
+        />
+      )}
     </>
   );
 };

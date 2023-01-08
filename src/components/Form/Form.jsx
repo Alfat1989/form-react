@@ -1,24 +1,31 @@
 import { useState } from 'react';
+import axios from 'axios';
+import InputMask from 'react-input-mask';
 import './Form.css';
 
-const Form = () => {
+const baseURL = '';
+
+const Form = ({ title }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [text, setText] = useState('');
 
-  const state = {
-    name,
-    phone,
-    text,
-  };
+  const str = /[A-Za-zA-Яа-яЁё]/g;
+  const num = /[0-9]/g;
 
   const onInput = e => {
     switch (e.target.name) {
       case 'name':
+        e.target.value = e.target.value.replace(num, '');
         setName(e.target.value);
         break;
       case 'phone':
-        setPhone(e.target.value);
+        e.target.value = e.target.value.replace(str, '');
+        const val = e.target.value.match(num);
+        if (val.length > 11) {
+          return;
+        }
+        setPhone(val.join(''));
         break;
       case 'text':
         setText(e.target.value);
@@ -31,11 +38,30 @@ const Form = () => {
 
   const onFormSubmit = e => {
     e.preventDefault();
-    console.log(state);
+    if (name === '' || name.length < 2 || phone === '' || phone.length < 11) {
+      return alert('Заполните все поля корректно');
+    }
+
+    axios
+      .post(baseURL, { name, phone, text })
+      .then(resp => {
+        console.log(resp.data);
+      })
+      .catch(error => {
+        console.log(error.message);
+      });
+
+    const form = e.currentTarget;
+    form.reset();
+    console.log({ name, phone, text });
+    setName('');
+    setPhone('');
+    setText('');
   };
 
   return (
     <div className="form__box">
+      <p>{title}</p>
       <form className="form" onSubmit={onFormSubmit}>
         <input
           id="name"
@@ -47,8 +73,10 @@ const Form = () => {
           onInput={onInput}
         />
 
-        <input
+        <InputMask
           id="phone"
+          mask={'+7 (999) 999 99 99'}
+          maskPlaceholder={'-'}
           value={phone}
           className="form__input"
           type="tel"
@@ -58,18 +86,18 @@ const Form = () => {
           onInput={onInput}
         />
 
-        <p>
-          <textarea
-            className="form__input"
-            value={text}
-            rows={6}
-            name="text"
-            placeholder="Text"
-            onInput={onInput}
-          ></textarea>
-        </p>
+        <textarea
+          className="form__input"
+          value={text}
+          rows={6}
+          name="text"
+          placeholder="Text"
+          onInput={onInput}
+        ></textarea>
 
-        <button type="submit">send</button>
+        <button className="form__button" disabled={false} type="submit">
+          Send
+        </button>
       </form>
     </div>
   );
