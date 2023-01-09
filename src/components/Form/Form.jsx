@@ -10,6 +10,17 @@ const Form = ({ title }) => {
   const [phone, setPhone] = useState('');
   const [text, setText] = useState('');
 
+  const [nameDirty, setNameDirty] = useState(false);
+  const [phoneDirty, setPhoneDirty] = useState(false);
+  const [textDirty, setTextDirty] = useState(false);
+
+  const nameError = 'Имя не может быть пустым или содержать меньше 2х символов';
+
+  const phoneError = 'Поле с номером должно содержать 11 симфолов';
+
+  const textError =
+    'Поле с текстом не может быть пустым или содержать менее 15 символов ';
+
   const str = /[A-Za-zA-Яа-яЁё]/g;
   const num = /[0-9]/g;
 
@@ -18,18 +29,30 @@ const Form = ({ title }) => {
       case 'name':
         e.target.value = e.target.value.replace(num, '');
         setName(e.target.value);
-        break;
+        if (e.target.value === '' || e.target.value.length < 2) {
+          return setNameDirty(true);
+        }
+        return setNameDirty(false);
+
       case 'phone':
         e.target.value = e.target.value.replace(str, '');
         const val = e.target.value.match(num);
         if (val.length > 11) {
           return;
         }
+        setPhoneDirty(true);
         setPhone(val.join(''));
+        if (phone.length >= 10) {
+          setPhoneDirty(false);
+        }
+
         break;
       case 'text':
         setText(e.target.value);
-        break;
+        if (text === '' || text.length < 15) {
+          return setTextDirty(true);
+        }
+        return setTextDirty(false);
 
       default:
         return;
@@ -38,7 +61,7 @@ const Form = ({ title }) => {
 
   const onFormSubmit = e => {
     e.preventDefault();
-    if (name === '' || name.length < 2 || phone === '' || phone.length < 11) {
+    if (nameDirty || phoneDirty || textDirty) {
       return alert('Заполните все поля корректно');
     }
 
@@ -61,8 +84,11 @@ const Form = ({ title }) => {
 
   return (
     <div className="form__box">
-      <p>{title}</p>
+      <p form__title>{title}</p>
       <form className="form" onSubmit={onFormSubmit}>
+        {nameDirty && (
+          <p style={{ color: 'red', fontSize: '12px' }}>{nameError}</p>
+        )}
         <input
           id="name"
           className="form__input"
@@ -72,7 +98,9 @@ const Form = ({ title }) => {
           placeholder="Name"
           onInput={onInput}
         />
-
+        {phoneDirty && (
+          <p style={{ color: 'red', fontSize: '12px' }}>{phoneError}</p>
+        )}
         <InputMask
           id="phone"
           mask={'+7 (999) 999 99 99'}
@@ -86,6 +114,9 @@ const Form = ({ title }) => {
           onInput={onInput}
         />
 
+        {textDirty && (
+          <p style={{ color: 'red', fontSize: '12px' }}>{textError}</p>
+        )}
         <textarea
           className="form__input"
           value={text}
